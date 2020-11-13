@@ -20,7 +20,7 @@ public class Fairy : MonoBehaviour
         if (Input.GetKey(KeyCode.Space)){
             print("Spaced Pressed");
         }
-        else if (Input.GetKey(KeyCode.A)){
+        if (Input.GetKey(KeyCode.A)){
             print("Rotating Left");
         }
         else if (Input.GetKey(KeyCode.D)){
