@@ -1,6 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
+
 
 public class EliRocket : MonoBehaviour{
     [SerializeField]float rcsThrust = 100f;
@@ -8,6 +11,10 @@ public class EliRocket : MonoBehaviour{
 
     Rigidbody rigidBody;
     AudioSource audioSource;
+
+    enum State { Alive, Dying, Transcending }
+    State state = State.Alive;
+
     // Start is called before the first frame update
     void Start(){
         rigidBody = GetComponent<Rigidbody>();
@@ -17,8 +24,11 @@ public class EliRocket : MonoBehaviour{
 
     // Update is called once per frame
     void Update(){
-        Thrust();
-        Rotate();
+        // Only rotate and Thrust when EliRocket is alive
+        if (state == State.Alive){
+            Thrust();
+            Rotate();
+        }
     }
     
     private void Rotate(){
@@ -44,10 +54,16 @@ public class EliRocket : MonoBehaviour{
             case "Friendly":
                 print("Friendly"); 
                 break; 
+            case "Finish":
+                state = State.Transcending;
+                Invoke("LoadNextScene", 1f);
+                break;
 
             default:
-                print("Deadly");
-                break;    
+                state = State.Dying;
+                //audioSource.Stop();
+                Invoke("LoadCurrentScene", 1f);
+                break;
         }
     }
 
@@ -64,5 +80,13 @@ public class EliRocket : MonoBehaviour{
         else{
             audioSource.Stop();
         }
+    }
+    private void LoadNextScene(){
+        //TODO: allow for more than 2 levels
+        SceneManager.LoadScene(1);
+
+    }
+    private void LoadCurrentScene(){
+        SceneManager.LoadScene(0);
     }
 }
