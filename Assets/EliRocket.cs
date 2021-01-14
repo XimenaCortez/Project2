@@ -6,8 +6,17 @@ using UnityEngine.SceneManagement;
 
 
 public class EliRocket : MonoBehaviour{
-    [SerializeField]float rcsThrust = 100f;
-    [SerializeField]float mainThrust = 100f;
+    [SerializeField] float rcsThrust = 100f;
+    [SerializeField] float mainThrust = 100f;
+    // Audio 
+    [SerializeField] AudioClip mainEngine;
+    [SerializeField] AudioClip deathSound;
+    [SerializeField] AudioClip finishSound;
+    //Particles
+    [SerializeField] ParticleSystem mainEngineParticles;
+    [SerializeField] ParticleSystem deathParticles;
+    [SerializeField] ParticleSystem finishParticles;
+
 
     Rigidbody rigidBody;
     AudioSource audioSource;
@@ -24,14 +33,15 @@ public class EliRocket : MonoBehaviour{
 
     // Update is called once per frame
     void Update(){
-        // Only rotate and Thrust when EliRocket is alive
+        // Only rotate and RespondtoThrustInput when EliRocket is alive
         if (state == State.Alive){
-            Thrust();
-            Rotate();
+            RespondtoThrustInput();
+            RespondtoRotateInput();
         }
     }
     
-    private void Rotate(){
+    private void RespondtoRotateInput(){
+        print("Rotation");
         float rotationThisFrame = rcsThrust * Time.deltaTime;
 
         // freeze rotation before we take manual control of rotation
@@ -50,43 +60,69 @@ public class EliRocket : MonoBehaviour{
     }
 
     void OnCollisionEnter(Collision collision){
+        if (state != State.Alive){
+            return;
+        }
+
         switch (collision.gameObject.tag){
             case "Friendly":
                 print("Friendly"); 
                 break; 
             case "Finish":
-                state = State.Transcending;
-                Invoke("LoadNextScene", 1f);
+                StartTransitionSequence();
                 break;
 
             default:
-                state = State.Dying;
-                //audioSource.Stop();
-                Invoke("LoadCurrentScene", 1f);
+                StartDyingSequence();
                 break;
         }
     }
 
-    private void Thrust(){
+    private void RespondtoThrustInput(){
         //GetKey applies all the time anf will report the status of the rotate key 
         if (Input.GetKey(KeyCode.Space)){
-            // Adding force in the direction the rocket will fly
-            rigidBody.AddRelativeForce(Vector3.up * mainThrust * Time.deltaTime);
-            // so audio doesn't play 
-            if (!audioSource.isPlaying){
-                audioSource.Play();
-            }
+            ApplyThrust();
         }
         else{
             audioSource.Stop();
+            mainEngineParticles.Stop();
         }
     }
+
+    private void StartTransitionSequence(){
+        state = State.Transcending;
+        audioSource.Stop();
+        audioSource.PlayOneShot(finishSound);
+        finishParticles.Play();
+        Invoke("LoadNextScene", 1f);
+    }
+
+    private void StartDyingSequence(){
+        state = State.Dying;
+        audioSource.Stop();
+        audioSource.PlayOneShot(deathSound);
+        deathParticles.Play();
+        Invoke("LoadCurrentScene", 1f);
+
+    }
+
     private void LoadNextScene(){
         //TODO: allow for more than 2 levels
         SceneManager.LoadScene(1);
 
     }
+
     private void LoadCurrentScene(){
         SceneManager.LoadScene(0);
+    }
+
+    private void ApplyThrust(){
+        // Adding force in the direction the rocket will fly
+            rigidBody.AddRelativeForce(Vector3.up * mainThrust * Time.deltaTime);
+            // so audio doesn't play 
+            if (!audioSource.isPlaying){
+                audioSource.PlayOneShot(mainEngine);
+            }
+            mainEngineParticles.Play();
     }
 }
