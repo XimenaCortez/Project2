@@ -8,6 +8,8 @@ using UnityEngine.SceneManagement;
 public class EliRocket : MonoBehaviour{
     [SerializeField] float rcsThrust = 100f;
     [SerializeField] float mainThrust = 100f;
+
+    [SerializeField] float levelLoadDelay = 1f;
     // Audio 
     [SerializeField] AudioClip mainEngine;
     [SerializeField] AudioClip deathSound;
@@ -94,7 +96,7 @@ public class EliRocket : MonoBehaviour{
         audioSource.Stop();
         audioSource.PlayOneShot(finishSound);
         finishParticles.Play();
-        Invoke("LoadNextScene", 1f);
+        Invoke("LoadNextScene", levelLoadDelay);
     }
 
     private void StartDyingSequence(){
@@ -102,7 +104,7 @@ public class EliRocket : MonoBehaviour{
         audioSource.Stop();
         audioSource.PlayOneShot(deathSound);
         deathParticles.Play();
-        Invoke("LoadCurrentScene", 1f);
+        Invoke("LoadCurrentScene", levelLoadDelay);
 
     }
 

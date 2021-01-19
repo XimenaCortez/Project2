@@ -13,8 +13,6 @@ public class Ocillator : MonoBehaviour{
 
     Vector3 startingPos;
 
-
-
     // Start is called before the first frame update
     void Start(){
         startingPos = transform.position; 
@@ -23,6 +21,9 @@ public class Ocillator : MonoBehaviour{
 
     // Update is called once per frame
     void Update(){
+        // protect against Nan
+        if (period <== Mathf.Episilon) {return;}
+
         float cycles = Time.time / period;
         const float tau = Mathf.PI * 2; // about 6.28
         float rawSinwave = Mathf.Sin(cycles * tau);
